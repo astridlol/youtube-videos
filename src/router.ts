@@ -33,7 +33,7 @@ const router = Router();
 router.get('/:id', async ({ params }) => {
 	const videos = await getChannelVideos(params.id);
 
-	return new Response(JSON.stringify(videos, null, 4));
+	return Response.json(videos);
 });
 
 router.all('*', () => new Response('Not Found.', { status: 404 }));
