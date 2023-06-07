@@ -15,14 +15,18 @@ interface Published {
 	relative: string;
 }
 
+interface Channel {
+	id: string;
+	link: string;
+	name: string;
+}
+
 interface VideoObject {
-	videoId: string;
-	videoLink: string;
-	channelId: string;
-	channelLink: string;
-	channelName: string;
-	videoTitle: string;
-	videoPublished: Published;
+	id: string;
+	link: string;
+	channel: Channel;
+	title: string;
+	published: Published;
 }
 const router = Router();
 
@@ -48,14 +52,15 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 
 	const formatted = dayjs(published);
 
-	newObj.videoId = getValue('yt:videoId');
-	newObj.videoLink = `https://youtu.be/watch?v=${newObj.videoId}`;
-	newObj.channelId = getValue('yt:channelId');
-	newObj.channelLink = `https://www.youtube.com/channel/${newObj.channelId}`;
-	newObj.channelName = getValue('author');
-	newObj.videoTitle = getValue('title');
-	// TODO: Implement DayJS
-	newObj.videoPublished = {
+	newObj.id = getValue('yt:videoId');
+	newObj.link = `https://youtu.be/watch?v=${newObj.id}`;
+	newObj.title = getValue('title');
+	newObj.channel = {
+		id: getValue('yt:channelId'),
+		link: `https://www.youtube.com/channel/${getValue('yt:channelId')}`,
+		name: getValue('author'),
+	};
+	newObj.published = {
 		date: published,
 		relative: formatted.fromNow(),
 	};
