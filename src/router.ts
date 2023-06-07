@@ -1,22 +1,18 @@
 import { Router } from 'itty-router';
 import convert from 'xml-js';
 
-// now let's create a router (note the lack of "new")
-const router = Router();
-
-// GET item
-router.get('/:id', async ({ params }) => {
-	const videos = await getChannelVideos(params.id);
-
-	return new Response(JSON.stringify(videos, null, 4));
-});
-
-// 404 for everything else
-router.all('*', () => new Response('Not Found.', { status: 404 }));
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
 
 interface VideoElement {
 	name: string;
 	elements: any[];
+}
+
+interface Published {
+	date: string;
+	relative: string;
 }
 
 interface VideoObject {
@@ -26,8 +22,17 @@ interface VideoObject {
 	channelLink: string;
 	channelName: string;
 	videoTitle: string;
-	videoPublished: string;
+	videoPublished: Published;
 }
+const router = Router();
+
+router.get('/:id', async ({ params }) => {
+	const videos = await getChannelVideos(params.id);
+
+	return new Response(JSON.stringify(videos, null, 4));
+});
+
+router.all('*', () => new Response('Not Found.', { status: 404 }));
 
 const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	const getValue = (key: string): string => {
@@ -39,6 +44,9 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	};
 
 	const newObj: VideoObject = {} as VideoObject;
+	const published = getValue('published');
+
+	const formatted = dayjs(published);
 
 	newObj.videoId = getValue('yt:videoId');
 	newObj.videoLink = `https://youtu.be/watch?v=${newObj.videoId}`;
@@ -47,7 +55,10 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	newObj.channelName = getValue('author');
 	newObj.videoTitle = getValue('title');
 	// TODO: Implement DayJS
-	newObj.videoPublished = getValue('published');
+	newObj.videoPublished = {
+		date: published,
+		relative: formatted.fromNow(),
+	};
 
 	return newObj;
 };
