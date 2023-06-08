@@ -27,6 +27,7 @@ interface VideoObject {
 	channel: Channel;
 	title: string;
 	published: Published;
+	thumbnail: string;
 }
 const router = Router();
 
@@ -55,6 +56,7 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	newObj.id = getValue('yt:videoId');
 	newObj.link = `https://youtu.be/watch?v=${newObj.id}`;
 	newObj.title = getValue('title');
+	newObj.thumbnail = `https://img.youtube.com/vi/${newObj.id}/maxresdefault.jpg`;
 	newObj.channel = {
 		id: getValue('yt:channelId'),
 		link: `https://www.youtube.com/channel/${getValue('yt:channelId')}`,
