@@ -24,6 +24,7 @@ interface Channel {
 interface VideoObject {
 	id: string;
 	link: string;
+	shortLink: string;
 	channel: Channel;
 	title: string;
 	published: Published;
@@ -54,7 +55,8 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	const formatted = dayjs(published);
 
 	newObj.id = getValue('yt:videoId');
-	newObj.link = `https://youtu.be/watch?v=${newObj.id}`;
+	newObj.shortLink = `https://youtu.be/watch?v=${newObj.id}`;
+	newObj.link = `https://youtube.com/watch?v=${newObj.id}`
 	newObj.title = getValue('title');
 	newObj.thumbnail = `https://img.youtube.com/vi/${newObj.id}/maxresdefault.jpg`;
 	newObj.channel = {
