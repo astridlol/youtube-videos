@@ -5,6 +5,18 @@ const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 dayjs.extend(relativeTime);
 
+async function checkForShort(id: string) {
+	const shortsURL = `https://www.youtube.com/shorts/${id}`;
+
+	try {
+		const response = await fetch(shortsURL, { method: 'GET', redirect: 'follow' });
+		return response.url === shortsURL;
+	} catch (error) {
+		console.error('Error:', error);
+		return false;
+	}
+}
+
 interface VideoElement {
 	name: string;
 	elements: any[];
@@ -23,6 +35,7 @@ interface Channel {
 
 interface VideoObject {
 	id: string;
+	isShort: boolean;
 	link: string;
 	shortLink: string;
 	channel: Channel;
@@ -40,7 +53,7 @@ router.get('/:id', async ({ params }) => {
 
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
-const parseVideo = (videoObj: VideoElement[]): VideoObject => {
+const parseVideo = async (videoObj: VideoElement[]): Promise<VideoObject> => {
 	const getValue = (key: string): string => {
 		const baseValue = videoObj.filter((obj) => obj.name === key)[0];
 		if (typeof baseValue === 'undefined') return `${key} was undefined`;
@@ -55,8 +68,15 @@ const parseVideo = (videoObj: VideoElement[]): VideoObject => {
 	const formatted = dayjs(published);
 
 	newObj.id = getValue('yt:videoId');
+
+	newObj.isShort = await checkForShort(newObj.id);
 	newObj.shortLink = `https://youtu.be/watch?v=${newObj.id}`;
-	newObj.link = `https://youtube.com/watch?v=${newObj.id}`
+	newObj.link = `https://youtube.com/watch?v=${newObj.id}`;
+
+	if (newObj.isShort) {
+		newObj.shortLink = `https://youtube.com/shorts/${newObj.id}`;
+	}
+
 	newObj.title = getValue('title');
 	newObj.thumbnail = `https://img.youtube.com/vi/${newObj.id}/maxresdefault.jpg`;
 	newObj.channel = {
@@ -79,13 +99,12 @@ const getChannelVideos = async (channelId: string) => {
 
 	const _videos = ytResponse.elements[0].elements.filter((obj: any) => obj.name === 'entry');
 
-	const videos: VideoObject[] = [];
-
-	_videos.forEach((v: any) => {
+	const videoPromises = _videos.map(async (v: any) => {
 		const elm = v.elements;
-		const parsed = parseVideo(elm);
-		videos.push(parsed);
+		return await parseVideo(elm);
 	});
+
+	const videos = await Promise.all(videoPromises);
 
 	return {
 		latest: videos.shift(),
