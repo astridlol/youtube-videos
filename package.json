@@ -1,20 +1,17 @@
 {
-	"name": "youtube-videos",
-	"version": "0.0.0",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler publish",
-		"dev": "wrangler dev"
-	},
-	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20230419.0",
-		"@types/node": "^20.2.5",
-		"itty-router": "^3.0.12",
-		"typescript": "^5.0.4",
-		"wrangler": "^3.0.0"
-	},
-	"dependencies": {
-		"dayjs": "^1.11.8",
-		"xml-js": "^1.6.11"
-	}
+  "name": "video-api",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify src/index.ts"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.12",
+    "hono": "^4.5.3",
+    "ky": "^1.5.0",
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "wrangler": "^3.57.2"
+  }
 }
